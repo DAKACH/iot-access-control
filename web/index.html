@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tableau de Bord - Système de Contrôle d'Accès IoT</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+  <!-- Login Screen -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-card glass">
+      <div class="login-brand">
+        <span class="login-icon">🔐</span>
+        <div>
+          <h1>Système IoT</h1>
+          <p>Contrôle d'Accès Sécurisé</p>
+        </div>
+      </div>
+      <form class="login-form" onsubmit="handleLogin(event)">
+        <label>
+          <span>Nom d'utilisateur</span>
+          <input type="text" id="login-username" placeholder="admin" autocomplete="username" required>
+        </label>
+        <label>
+          <span>Mot de passe</span>
+          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" required>
+        </label>
+        <div class="login-error" id="login-error"></div>
+        <div class="login-footer">
+          <button type="submit" class="btn btn-primary">
+            🔓 Se Connecter
+          </button>
+        </div>
+      </form>
+      <div class="login-info">
+        <small>🛡️ Projet Cybersécurité - ENSA 2026</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard (hidden initially) -->
+  <div id="dashboard" class="container hidden">
+    <!-- Header -->
+    <header>
+      <div class="header-left">
+        <div class="theme-toggle" id="theme-toggle" title="Changer le thème">
+          <span class="theme-icon">🌙</span>
+        </div>
+      </div>
+      <h1>🔐 Système de Contrôle d'Accès IoT</h1>
+      <div class="header-right">
+        <div class="status">
+          <span id="status-indicator" class="indicator">●</span>
+          <span id="status-text">Connexion...</span>
+        </div>
+        <button class="btn-logout" onclick="handleLogout()" title="Déconnexion">
+          🚪 Déconnexion
+        </button>
+      </div>
+    </header>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card glass">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+          <h3>Total des Tentatives</h3>
+          <p class="stat-value" id="total-count">0</p>
+        </div>
+      </div>
+
+      <div class="stat-card success glass">
+        <div class="stat-icon">✅</div>
+        <div class="stat-content">
+          <h3>Accès Autorisés</h3>
+          <p class="stat-value" id="granted-count">0</p>
+          <span class="stat-percent" id="granted-percent">0%</span>
+        </div>
+      </div>
+
+      <div class="stat-card danger glass">
+        <div class="stat-icon">⛔</div>
+        <div class="stat-content">
+          <h3>Accès Refusés</h3>
+          <p class="stat-value" id="denied-count">0</p>
+          <span class="stat-percent" id="denied-percent">0%</span>
+        </div>
+      </div>
+
+      <div class="stat-card glass">
+        <div class="stat-icon">🚪</div>
+        <div class="stat-content">
+          <h3>État de la Porte</h3>
+          <p class="stat-value" id="door-status">Fermée</p>
+          <span class="stat-time" id="last-update">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Dashboard -->
+    <div class="security-section glass">
+      <div class="section-header">
+        <h2>🛡️ Tableau de Bord Sécurité</h2>
+        <span class="risk-badge" id="risk-badge">LOW</span>
+      </div>
+      <div class="security-grid">
+        <!-- Risk Gauge -->
+        <div class="risk-gauge-container">
+          <div class="risk-gauge">
+            <svg viewBox="0 0 120 120" class="gauge-svg">
+              <circle cx="60" cy="60" r="50" class="gauge-bg" />
+              <circle cx="60" cy="60" r="50" class="gauge-fill" id="risk-gauge-fill" />
+            </svg>
+            <div class="gauge-center">
+              <span class="gauge-value" id="risk-score">0</span>
+              <span class="gauge-label">Risk Score</span>
+            </div>
+          </div>
+          <div class="risk-level" id="risk-level-text">Niveau: Faible</div>
+        </div>
+
+        <!-- Security Metrics -->
+        <div class="security-metrics">
+          <div class="metric-card">
+            <div class="metric-icon">🔴</div>
+            <div class="metric-info">
+              <span class="metric-value" id="failure-rate">0%</span>
+              <span class="metric-label">Taux d'Échec</span>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon">⚠️</div>
+            <div class="metric-info">
+              <span class="metric-value" id="brute-force-count">0</span>
+              <span class="metric-label">Tentatives Brute Force</span>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon">🌙</div>
+            <div class="metric-info">
+              <span class="metric-value" id="suspicious-count">0</span>
+              <span class="metric-label">Activité Suspecte</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerts Panel -->
+        <div class="alerts-panel">
+          <h3>🚨 Alertes de Sécurité</h3>
+          <div class="alerts-list" id="alerts-list">
+            <div class="alert-item success">
+              <span class="alert-icon">✅</span>
+              <span class="alert-text">Aucune alerte - Système sécurisé</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Control Buttons -->
+    <div class="controls glass">
+      <h2>🎮 Commandes de Contrôle</h2>
+      <div class="button-group">
+        <button class="btn btn-primary" onclick="sendCommand('open')">
+          🔓 Ouvrir la Porte
+        </button>
+        <button class="btn btn-warning" onclick="sendCommand('lockdown_on')">
+          🔒 Activer Lockdown
+        </button>
+        <button class="btn btn-info" onclick="sendCommand('lockdown_off')">
+          🔓 Désactiver Lockdown
+        </button>
+        <button class="btn btn-secondary" onclick="sendCommand('buzzer_test')">
+          🔔 Tester le Buzzer
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters-section glass">
+      <h2>🔍 Filtres</h2>
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label for="filter-device">Appareil</label>
+          <select id="filter-device">
+            <option value="">Tous</option>
+            <option value="door_01">door_01</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-result">Résultat</label>
+          <select id="filter-result">
+            <option value="">Tous</option>
+            <option value="GRANTED">Autorisé</option>
+            <option value="DENIED">Refusé</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-range">Période</label>
+          <select id="filter-range">
+            <option value="1h">1 heure</option>
+            <option value="24h" selected>24 heures</option>
+            <option value="7d">7 jours</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-limit">Afficher</label>
+          <select id="filter-limit">
+            <option value="10">10 lignes</option>
+            <option value="25" selected>25 lignes</option>
+            <option value="50">50 lignes</option>
+            <option value="100">100 lignes</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <button class="btn btn-primary btn-sm" onclick="applyFilters()">
+            🔄 Appliquer
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Heat Map -->
+    <div class="heatmap-section glass">
+      <div class="section-header">
+        <h2>🗓️ Carte Thermique d'Activité</h2>
+        <span class="heatmap-legend">
+          <span class="legend-item"><span class="legend-color low"></span> Faible</span>
+          <span class="legend-item"><span class="legend-color medium"></span> Moyen</span>
+          <span class="legend-item"><span class="legend-color high"></span> Élevé</span>
+        </span>
+      </div>
+      <div class="heatmap-container">
+        <div class="heatmap-grid" id="heatmap-grid"></div>
+        <div class="heatmap-hours">
+          <span>00h</span>
+          <span>06h</span>
+          <span>12h</span>
+          <span>18h</span>
+          <span>23h</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-container glass">
+      <h2>📈 Graphique d'Activité</h2>
+      <canvas id="activityChart"></canvas>
+    </div>
+
+    <!-- Access Logs Table -->
+    <div class="logs-section glass">
+      <div class="logs-header">
+        <h2>📋 Journal d'Accès</h2>
+        <button class="btn btn-secondary btn-sm" onclick="exportCSV()">
+          📥 Exporter CSV
+        </button>
+      </div>
+      <div class="table-container">
+        <table id="logs-table">
+          <thead>
+            <tr>
+              <th>Horodatage</th>
+              <th>Appareil</th>
+              <th>UID</th>
+              <th>Résultat</th>
+              <th>WiFi</th>
+            </tr>
+          </thead>
+          <tbody id="logs-body">
+            <tr>
+              <td colspan="5" style="text-align: center;">Chargement...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>🛡️ Projet IoT - Cybersécurité & Systèmes Embarqués | ENSA 2026</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
