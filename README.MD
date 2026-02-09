@@ -67,8 +67,7 @@ A complete **IoT access control** project using **ESP32 + RFID** with a modern *
 
 ## 🧾 Wiring Diagram (ESP32 + RFID + Relay + LEDs + Buzzer)
 
-> Place your wiring diagram image in:
-> `assets/wiring/wiring-diagram.png`
+
 
 ![Wiring Diagram](assets/wiring/wiring-diagram.png)
 
@@ -76,7 +75,7 @@ A complete **IoT access control** project using **ESP32 + RFID** with a modern *
 
 ## 📸 Screenshots
 
-> Place screenshots in `assets/screenshots/` with the following names.
+
 
 ### 1) Login
 
